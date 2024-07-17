@@ -16,7 +16,7 @@ This is a Flutter application that allows teachers to create and manage exam que
 
     ```bash
     git clone https://github.com/yourusername/exam-creator-app.git
-    cd exam-creator-app
+    cd Exam-Creator-App
     ```
 
 2. Install dependencies:
