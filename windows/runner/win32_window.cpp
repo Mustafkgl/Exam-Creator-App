@@ -214,3 +214,75 @@ Win32Window::MessageHandler(HWND hwnd,
       return 0;
 
     case WM_DWMCOLORIZATIONCOLORCHANGED:
+      UpdateTheme(hwnd);
+      return 0;
+  }
+
+  return DefWindowProc(window_handle_, message, wparam, lparam);
+}
+
+void Win32Window::Destroy() {
+  OnDestroy();
+
+  if (window_handle_) {
+    DestroyWindow(window_handle_);
+    window_handle_ = nullptr;
+  }
+  if (g_active_window_count == 0) {
+    WindowClassRegistrar::GetInstance()->UnregisterWindowClass();
+  }
+}
+
+Win32Window* Win32Window::GetThisFromHandle(HWND const window) noexcept {
+  return reinterpret_cast<Win32Window*>(
+      GetWindowLongPtr(window, GWLP_USERDATA));
+}
+
+void Win32Window::SetChildContent(HWND content) {
+  child_content_ = content;
+  SetParent(content, window_handle_);
+  RECT frame = GetClientArea();
+
+  MoveWindow(content, frame.left, frame.top, frame.right - frame.left,
+             frame.bottom - frame.top, true);
+
+  SetFocus(child_content_);
+}
+
+RECT Win32Window::GetClientArea() {
+  RECT frame;
+  GetClientRect(window_handle_, &frame);
+  return frame;
+}
+
+HWND Win32Window::GetHandle() {
+  return window_handle_;
+}
+
+void Win32Window::SetQuitOnClose(bool quit_on_close) {
+  quit_on_close_ = quit_on_close;
+}
+
+bool Win32Window::OnCreate() {
+  // No-op; provided for subclasses.
+  return true;
+}
+
+void Win32Window::OnDestroy() {
+  // No-op; provided for subclasses.
+}
+
+void Win32Window::UpdateTheme(HWND const window) {
+  DWORD light_mode;
+  DWORD light_mode_size = sizeof(light_mode);
+  LSTATUS result = RegGetValue(HKEY_CURRENT_USER, kGetPreferredBrightnessRegKey,
+                               kGetPreferredBrightnessRegValue,
+                               RRF_RT_REG_DWORD, nullptr, &light_mode,
+                               &light_mode_size);
+
+  if (result == ERROR_SUCCESS) {
+    BOOL enable_dark_mode = light_mode == 0;
+    DwmSetWindowAttribute(window, DWMWA_USE_IMMERSIVE_DARK_MODE,
+                          &enable_dark_mode, sizeof(enable_dark_mode));
+  }
+}
