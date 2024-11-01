@@ -14,3 +14,19 @@ void CreateAndAttachConsole() {
       _dup2(_fileno(stdout), 1);
     }
     if (freopen_s(&unused, "CONOUT$", "w", stderr)) {
+      _dup2(_fileno(stdout), 2);
+    }
+    std::ios::sync_with_stdio();
+    FlutterDesktopResyncOutputStreams();
+  }
+}
+
+std::vector<std::string> GetCommandLineArguments() {
+  // Convert the UTF-16 command line arguments to UTF-8 for the Engine to use.
+  int argc;
+  wchar_t** argv = ::CommandLineToArgvW(::GetCommandLineW(), &argc);
+  if (argv == nullptr) {
+    return std::vector<std::string>();
+  }
+
+  std::vector<std::string> command_line_arguments;
