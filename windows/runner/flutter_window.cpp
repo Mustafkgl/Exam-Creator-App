@@ -15,3 +15,22 @@ bool FlutterWindow::OnCreate() {
   }
 
   RECT frame = GetClientArea();
+
+  // The size here must match the window dimensions to avoid unnecessary surface
+  // creation / destruction in the startup path.
+  flutter_controller_ = std::make_unique<flutter::FlutterViewController>(
+      frame.right - frame.left, frame.bottom - frame.top, project_);
+  // Ensure that basic setup of the controller was successful.
+  if (!flutter_controller_->engine() || !flutter_controller_->view()) {
+    return false;
+  }
+  RegisterPlugins(flutter_controller_->engine());
+  SetChildContent(flutter_controller_->view()->GetNativeWindow());
+
+  flutter_controller_->engine()->SetNextFrameCallback([&]() {
+    this->Show();
+  });
+
+  // Flutter can complete the first frame before the "show window" callback is
+  // registered. The following call ensures a frame is pending to ensure the
+  // window is shown. It is a no-op if the first frame hasn't completed yet.
