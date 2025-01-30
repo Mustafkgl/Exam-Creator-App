@@ -30,3 +30,21 @@ This is a Flutter application that allows teachers to create and manage exam que
     ```bash
     flutter run
     ```
+
+## Usage
+
+### Adding Questions
+
+1. Tap on the floating action button on the main screen.
+2. Fill in the details for the question (question text, image, and multiple-choice answers).
+3. Tap on the "Save Question" button to save the question.
+
+### Viewing Questions
+
+1. On the main screen, you will see a list of saved questions.
+2. Each question will have options to edit or delete it.
+
+## Code Structure
+
+- `main.dart`: The main entry point of the application.
+- `form_screen.dart`: The screen for adding questions with images and multiple-choice answers.
